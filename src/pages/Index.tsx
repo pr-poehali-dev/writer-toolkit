@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -45,6 +45,7 @@ const Index = () => {
   ]);
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [newProjectTitle, setNewProjectTitle] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const countWords = (text: string) => {
     const trimmed = text.trim();
@@ -98,6 +99,57 @@ const Index = () => {
   const handleProjectSelect = (project: Project) => {
     setCurrentProject(project);
     setActiveTab('editor');
+  };
+
+  const insertFormatting = (before: string, after: string = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = currentProject.content.substring(start, end);
+    const beforeText = currentProject.content.substring(0, start);
+    const afterText = currentProject.content.substring(end);
+
+    const newText = beforeText + before + selectedText + after + afterText;
+    const newCursorPos = start + before.length + selectedText.length + after.length;
+
+    handleTextChange(newText);
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
+  const makeBold = () => {
+    insertFormatting('**', '**');
+  };
+
+  const makeHeading = (level: number) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const beforeText = currentProject.content.substring(0, start);
+    const afterText = currentProject.content.substring(start);
+    
+    const lastNewline = beforeText.lastIndexOf('\n');
+    const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+    const lineText = beforeText.substring(lineStart);
+    
+    const existingHeading = lineText.match(/^#{1,6}\s/);
+    if (existingHeading) {
+      const newBeforeText = beforeText.substring(0, lineStart) + lineText.replace(/^#{1,6}\s/, '#'.repeat(level) + ' ');
+      handleTextChange(newBeforeText + afterText);
+    } else {
+      const newBeforeText = beforeText.substring(0, lineStart) + '#'.repeat(level) + ' ' + lineText;
+      handleTextChange(newBeforeText + afterText);
+    }
+    
+    setTimeout(() => {
+      textarea.focus();
+    }, 0);
   };
 
   const wordCount = countWords(currentProject.content);
@@ -159,13 +211,55 @@ const Index = () => {
                 </div>
               </div>
               
+              <div className="border-b border-border bg-card px-6 py-2 flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={makeBold}
+                  className="gap-2"
+                  title="Жирный (Ctrl+B)"
+                >
+                  <Icon name="Bold" size={16} />
+                  <span className="text-sm">Жирный</span>
+                </Button>
+                <Separator orientation="vertical" className="h-6 mx-1" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => makeHeading(1)}
+                  className="gap-1"
+                  title="Заголовок 1"
+                >
+                  <Icon name="Heading1" size={16} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => makeHeading(2)}
+                  className="gap-1"
+                  title="Заголовок 2"
+                >
+                  <Icon name="Heading2" size={16} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => makeHeading(3)}
+                  className="gap-1"
+                  title="Заголовок 3"
+                >
+                  <Icon name="Heading3" size={16} />
+                </Button>
+              </div>
+              
               <div className="flex-1 overflow-auto p-6">
                 <div className="max-w-4xl mx-auto">
                   <Textarea
+                    ref={textareaRef}
                     value={currentProject.content}
                     onChange={(e) => handleTextChange(e.target.value)}
-                    placeholder="Начните писать..."
-                    className="min-h-[calc(100vh-300px)] border-0 p-8 text-lg leading-relaxed resize-none focus-visible:ring-0 bg-card"
+                    placeholder="Начните писать...\n\nИспользуйте панель форматирования:\n- **жирный текст**\n- # Заголовок 1\n- ## Заголовок 2\n- ### Заголовок 3"
+                    className="min-h-[calc(100vh-350px)] border-0 p-8 text-lg leading-relaxed resize-none focus-visible:ring-0 bg-card"
                     style={{ fontFamily: 'Merriweather, serif' }}
                   />
                 </div>
