@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,6 +58,26 @@ const Index = () => {
     const wordsPerMinute = 200;
     return Math.ceil(wordCount / wordsPerMinute);
   };
+
+  const extractHeadings = (text: string) => {
+    const lines = text.split('\n');
+    const headings: { level: number; text: string; line: number }[] = [];
+    
+    lines.forEach((line, index) => {
+      const match = line.match(/^(#{1,6})\s+(.+)$/);
+      if (match) {
+        headings.push({
+          level: match[1].length,
+          text: match[2].trim(),
+          line: index
+        });
+      }
+    });
+    
+    return headings;
+  };
+
+  const tableOfContents = useMemo(() => extractHeadings(currentProject.content), [currentProject.content]);
 
   const handleTextChange = (text: string) => {
     const updated = {
@@ -268,6 +288,31 @@ const Index = () => {
 
             <aside className="w-64 border-l border-border bg-card p-6 overflow-auto">
               <div className="space-y-6">
+                {tableOfContents.length > 0 && (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        Оглавление
+                      </h3>
+                      <div className="space-y-1">
+                        {tableOfContents.map((heading, index) => (
+                          <div
+                            key={index}
+                            className="text-sm text-muted-foreground hover:text-foreground cursor-pointer py-1 transition-colors"
+                            style={{ 
+                              paddingLeft: `${(heading.level - 1) * 12}px`,
+                              fontFamily: 'Inter, sans-serif'
+                            }}
+                          >
+                            {heading.text}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <Separator />
+                  </>
+                )}
+                
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Статистика
