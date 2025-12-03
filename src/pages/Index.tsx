@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -272,16 +273,38 @@ const Index = () => {
                 </Button>
               </div>
               
-              <div className="flex-1 overflow-auto p-6">
-                <div className="max-w-4xl mx-auto">
+              <div className="flex-1 overflow-auto p-6 grid grid-cols-2 gap-6">
+                <div className="border-r border-border pr-6">
+                  <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Редактор
+                  </h3>
                   <Textarea
                     ref={textareaRef}
                     value={currentProject.content}
                     onChange={(e) => handleTextChange(e.target.value)}
                     placeholder="Начните писать...\n\nИспользуйте панель форматирования:\n- **жирный текст**\n- # Заголовок 1\n- ## Заголовок 2\n- ### Заголовок 3"
-                    className="min-h-[calc(100vh-350px)] border-0 p-8 text-lg leading-relaxed resize-none focus-visible:ring-0 bg-card"
+                    className="min-h-[calc(100vh-350px)] border-0 p-6 text-base leading-relaxed resize-none focus-visible:ring-0 bg-card"
                     style={{ fontFamily: 'Merriweather, serif' }}
                   />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Предпросмотр
+                  </h3>
+                  <div className="p-6 min-h-[calc(100vh-350px)] bg-card rounded-lg">
+                    <ReactMarkdown
+                      className="prose prose-slate max-w-none"
+                      components={{
+                        h1: ({node, ...props}) => <h1 style={{ fontFamily: 'Merriweather, serif', fontSize: '2em', fontWeight: 'bold', marginBottom: '0.5em', marginTop: '0.5em' }} {...props} />,
+                        h2: ({node, ...props}) => <h2 style={{ fontFamily: 'Merriweather, serif', fontSize: '1.5em', fontWeight: 'bold', marginBottom: '0.5em', marginTop: '0.5em' }} {...props} />,
+                        h3: ({node, ...props}) => <h3 style={{ fontFamily: 'Merriweather, serif', fontSize: '1.25em', fontWeight: 'bold', marginBottom: '0.5em', marginTop: '0.5em' }} {...props} />,
+                        p: ({node, ...props}) => <p style={{ fontFamily: 'Merriweather, serif', fontSize: '1em', lineHeight: '1.75', marginBottom: '1em' }} {...props} />,
+                        strong: ({node, ...props}) => <strong style={{ fontWeight: 'bold' }} {...props} />,
+                      }}
+                    >
+                      {currentProject.content || '*Начните писать, чтобы увидеть предпросмотр...*'}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             </div>
