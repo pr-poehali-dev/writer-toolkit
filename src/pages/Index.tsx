@@ -147,6 +147,68 @@ const Index = () => {
     insertFormatting('**', '**');
   };
 
+  const makeList = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const beforeText = currentProject.content.substring(0, start);
+    const afterText = currentProject.content.substring(start);
+    
+    const lastNewline = beforeText.lastIndexOf('\n');
+    const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+    const lineText = beforeText.substring(lineStart);
+    
+    const newBeforeText = beforeText.substring(0, lineStart) + '- ' + lineText;
+    handleTextChange(newBeforeText + afterText);
+    
+    setTimeout(() => {
+      textarea.focus();
+    }, 0);
+  };
+
+  const makeNumberedList = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const beforeText = currentProject.content.substring(0, start);
+    const afterText = currentProject.content.substring(start);
+    
+    const lastNewline = beforeText.lastIndexOf('\n');
+    const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+    const lineText = beforeText.substring(lineStart);
+    
+    const newBeforeText = beforeText.substring(0, lineStart) + '1. ' + lineText;
+    handleTextChange(newBeforeText + afterText);
+    
+    setTimeout(() => {
+      textarea.focus();
+    }, 0);
+  };
+
+  const makeLink = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = currentProject.content.substring(start, end);
+    const beforeText = currentProject.content.substring(0, start);
+    const afterText = currentProject.content.substring(end);
+
+    const linkText = selectedText || 'текст ссылки';
+    const newText = beforeText + `[${linkText}](url)` + afterText;
+    const newCursorPos = start + linkText.length + 3;
+
+    handleTextChange(newText);
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(newCursorPos, newCursorPos + 3);
+    }, 0);
+  };
+
   const makeHeading = (level: number) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -271,6 +333,35 @@ const Index = () => {
                 >
                   <Icon name="Heading3" size={16} />
                 </Button>
+                <Separator orientation="vertical" className="h-6 mx-1" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={makeList}
+                  className="gap-1"
+                  title="Маркированный список"
+                >
+                  <Icon name="List" size={16} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={makeNumberedList}
+                  className="gap-1"
+                  title="Нумерованный список"
+                >
+                  <Icon name="ListOrdered" size={16} />
+                </Button>
+                <Separator orientation="vertical" className="h-6 mx-1" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={makeLink}
+                  className="gap-1"
+                  title="Ссылка"
+                >
+                  <Icon name="Link" size={16} />
+                </Button>
               </div>
               
               <div className="flex-1 overflow-auto p-6 grid grid-cols-2 gap-6">
@@ -300,6 +391,10 @@ const Index = () => {
                         h3: ({node, ...props}) => <h3 style={{ fontFamily: 'Merriweather, serif', fontSize: '1.25em', fontWeight: 'bold', marginBottom: '0.5em', marginTop: '0.5em' }} {...props} />,
                         p: ({node, ...props}) => <p style={{ fontFamily: 'Merriweather, serif', fontSize: '1em', lineHeight: '1.75', marginBottom: '1em' }} {...props} />,
                         strong: ({node, ...props}) => <strong style={{ fontWeight: 'bold' }} {...props} />,
+                        ul: ({node, ...props}) => <ul style={{ fontFamily: 'Merriweather, serif', marginLeft: '1.5em', marginBottom: '1em', listStyleType: 'disc' }} {...props} />,
+                        ol: ({node, ...props}) => <ol style={{ fontFamily: 'Merriweather, serif', marginLeft: '1.5em', marginBottom: '1em', listStyleType: 'decimal' }} {...props} />,
+                        li: ({node, ...props}) => <li style={{ marginBottom: '0.5em' }} {...props} />,
+                        a: ({node, ...props}) => <a style={{ color: '#3b82f6', textDecoration: 'underline' }} {...props} />,
                       }}
                     >
                       {currentProject.content || '*Начните писать, чтобы увидеть предпросмотр...*'}
