@@ -382,9 +382,8 @@ const Index = () => {
                   <h3 className="text-sm font-semibold text-foreground mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Предпросмотр
                   </h3>
-                  <div className="p-6 min-h-[calc(100vh-350px)] bg-card rounded-lg">
+                  <div className="p-6 min-h-[calc(100vh-350px)] bg-card rounded-lg prose prose-slate max-w-none">
                     <ReactMarkdown
-                      className="prose prose-slate max-w-none"
                       components={{
                         h1: ({node, ...props}) => <h1 style={{ fontFamily: 'Merriweather, serif', fontSize: '2em', fontWeight: 'bold', marginBottom: '0.5em', marginTop: '0.5em' }} {...props} />,
                         h2: ({node, ...props}) => <h2 style={{ fontFamily: 'Merriweather, serif', fontSize: '1.5em', fontWeight: 'bold', marginBottom: '0.5em', marginTop: '0.5em' }} {...props} />,
